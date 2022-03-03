@@ -192,8 +192,7 @@ def finger_tracking():
         frame = vs.read()
         flipped = cv2.flip(frame, 1)
         tracker = imutils.resize(flipped, width=600)
-        blur = cv2.GaussianBlur(tracker, (5,5),0)
-        frame = cv2.cvtColor(blur, cv2.COLOR_BGR2RGB)
+        frame = cv2.cvtColor(tracker, cv2.COLOR_BGR2RGB)
  
         result = hands.process(frame)
  
@@ -205,34 +204,62 @@ def finger_tracking():
                     frame_height = frame.shape[0]
                     frame_width = frame.shape[1]
  
-                    x = lm.x * frame_width
-                    y = lm.y * frame_height
+                    x = int(lm.x * frame_width)
+                    y = int(lm.y * frame_height)
  
-                    #cv2.circle(tracker, (x, y), 3, (255, 0, 255), cv2.FILLED)
+                    cv2.circle(tracker, (x, y), 3, (255, 0, 255), cv2.FILLED)
  
                     landmark_list.append((id, x, y))
+                drawer.draw_landmarks(tracker, multi_hand_landmark, mp_hand.HAND_CONNECTIONS)
                    
-                   
+        finger_count = 0
         if len(landmark_list) > 0:
             if landmark_list[4][1] < landmark_list[3][1]:
                 print("thumb")
-                pyautogui.press('down')
-                last_dir = 'down'
+                finger_count += 1
+                #pyautogui.press('down')
+                #last_dir = 'down'
 
             if landmark_list[8][2] < landmark_list[6][2]:
                 print("forefinger")
-                pyautogui.press('left')
-                last_dir = 'left'
+                finger_count += 1
+                #pyautogui.press('left')
+                #last_dir = 'left'
             if landmark_list[12][2] < landmark_list[10][2]:
                 print("middle")
-                pyautogui.press('up')
-                last_dir = 'up'
+                finger_count += 1
+                #pyautogui.press('up')
+                #last_dir = 'up'
             if landmark_list[16][2] < landmark_list[14][2]:
                 print("ring")
+                finger_count += 1
             if landmark_list[20][2] < landmark_list[18][2]:
                 print("pinky")
-                pyautogui.press('right')
+                finger_count += 1
+                #pyautogui.press('right')
+                #last_dir = 'right'
+
+            #These are the controls for finger count, to use individual finger controls: Comment out the if-else chain below and uncomment the pygui and last_dir lines from the if-else chain above
+            if finger_count >= 4: #4 or 5 fingers
+                pyautogui.press('up')
+                last_dir = 'up'
+            elif finger_count > 2: #3 fingers
+                pyautogui.press('right') 
                 last_dir = 'right'
+            elif finger_count > 1: #2 fingers
+                pyautogui.press('left')
+                last_dir = 'left'
+            elif finger_count == 1: #1 finger
+                pyautogui.press('down')
+                last_dir = 'down'
+
+
+
+
+            
+        cv2.imshow("Image", tracker)
+        cv2.waitKey(1)
+
 
 
 
